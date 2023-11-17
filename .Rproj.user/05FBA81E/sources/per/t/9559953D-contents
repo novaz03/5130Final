@@ -66,25 +66,26 @@ red_eclsk<-data.frame(scale(red_eclsk,center = FALSE,scale=TRUE)) # Here the fal
 #wHICH Turned out to be unnecessary, see normality
 
 summary(poly_model)
-pr_analysis<-prcomp(red_eclsk,scale=TRUE)
+PRED_mat <- subset(red_eclsk,select = -c(C6R4MSCL))
+pr_analysis<-prcomp(PRED_mat,scale=TRUE)
 
 screeplot(pr_analysis)
 summary(pr_analysis)
 
-pc1_loadings<-pr_analysis$rotation[,1]
+pc1_loadings<-abs(pr_analysis$rotation[,1])
 pc1_loadings
 
-sorted_pc1_loadings <- sort(abs(pc1_loadings), decreasing = TRUE)
+sorted_pc1_loadings <- sort((pc1_loadings), decreasing = TRUE)
 sorted_pc1_loadings
 
 pc2_loadings<-pr_analysis$rotation[,2]
 pc2_loadings
 
-sorted_pc2_loadings <- sort(abs(pc2_loadings), decreasing = TRUE)
+sorted_pc2_loadings <- sort((pc2_loadings), decreasing = TRUE)
 sorted_pc2_loadings
 #PCA
 #Roughly estimate significant estimators
-barplot(pc1_loadings, main = "Loadings for PC1")
+barplot(sorted_pc1_loadings, main = "Loadings for PC1")
 
 
 model_ana<-lm(C6R4MSCL~., data = red_eclsk)
