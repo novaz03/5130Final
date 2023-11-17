@@ -1,0 +1,152 @@
+---
+title: "Untitled"
+author: "Sizhe Zhang"
+date: "2023-11-17"
+output: html_document
+---
+
+```{r,echo=FALSE}
+knitr::opts_chunk$set(warning = FALSE)
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+library(ggplot2)
+library(carData)
+library(car)
+library(MASS)
+library(lfactors)
+library(Dire)
+library(EdSurvey)
+library(GGally)
+```
+Necessary packages
+```{r}
+load("Project Data.Rdata")
+eclsk <- subset(eclsk_c,select = -CHILDID)
+##Deleting irrelavant ID
+```
+## Parameter of choice: Should we use the math results from first three grades?
+#### For the rejected parameters, note the strong correlation: in fact they will explain ~75% of the variability (out of ~78%)
+```{r}
+rej_model<-lm(rej_eclsk$C6R4MSCL~.,data=rej_eclsk)
+summary(rej_model)
+full_model <-lm(C6R4MSCL~.,data=eclsk)
+summary(full_model)
+```
+And a further PCA on full model:
+```{r}
+pr_analysis<-prcomp(eclsk,scale=TRUE)
+screeplot(pr_analysis,type = 'l')
+summary(pr_analysis)
+```
+
+## Rationale for eliminating the earlier grades' scores on math when predicting the fifth grade
+
+
+#### Data extendability
+
+If we want to predict a kindergarten kid's capabilities in maths in future at the time of enrollment, 2/3/4-th grades' scores will not be available
+
+#### Statistical value of model
+Predicting a kid's performance with previous performance seems too easy.
+
+#### Our interest:
+To use other available data to draw connection between the environmental factor and education factors on a child's capability in completing certain tasks.
+
+```{r}
+red_eclsk<-data.frame(scale(red_eclsk,center = TRUE,scale=TRUE))
+```
+## Preliminary scaling: preserving non-negativity of some variables for further analysis use.
+Also improve numerical stability, $X'_i \sim N(0,1)$ 
+```{r}
+pr_analysis<-prcomp(red_eclsk,scale=TRUE)
+screeplot(pr_analysis,ylim=c(0,8),xlim=c(1,8),type = 'l')
+summary(pr_analysis)
+```
+#### PCA loading
+```{r}
+pc1_loadings<-pr_analysis$rotation[,1]
+pc1_loadings
+sorted_pc1_loadings <- sort(abs(pc1_loadings), decreasing = TRUE)
+sorted_pc1_loadings
+```
+#### normality check
+Quick check - good enough?
+
+```{r}
+hist(red_eclsk$C6R4MSCL,breaks = "Scott")
+#ggpairs(red_eclsk)
+```
+## Preliminary analysis
+
+```{r}
+model_ana<-lm(C6R4MSCL~., data = red_eclsk)
+summary(model_ana)
+
+```
+#### Colinearity tests (all of below)
+
+```{r}
+vif_values <- vif(model_ana)
+print(vif_values)
+
+
+design_matrix <- model.matrix(model_ana)
+svd_values <- svd(design_matrix)
+condition_index <- sqrt(max(svd_values$d)/svd_values$d)
+
+```
+### General info
+```{r}
+par(mfrow = c(2, 2))
+plot(model_ana)
+```
+
+### More on non-linearity
+```{r}
+
+par(mfrow = c(5, 6))
+crPlots(model_ana)
+```
+
+## First Conclusions
+
+#### Normality
+
+Good QQplot
+
+#### homoskedasticity
+
+Not so good, obvious cone-shaped
+
+#### Linearity
+
+Not so good, some curve
+
+# Our aim for the next step:
+
+## Multiple binary regressor:
+
+#### The Gauss-Markov assumption likely to fail: non-homoskedastic as we have observed: $\epsilon ~P_{x_i}, X_i \sim \{0,1\}$
+
+###Definitely some non-linearity here: crPlots()
+
+### And also some high leverage points and high Cook-distance points
+
+### And also some bad predictors.
+
+#### Tentative sub-set of modelling: White, male, disabled kids with two parents that never attended head-start, never changed school, never used foodstamp, and went to special education. (size 1755 before further reduction.)
+
+#### 26 predictors, $R^2_{raw} = 0.43$
+```{r}
+
+##
+```
+```{r}
+##setwd(dir = "F:")
+##eclsk_df <- readECLS_K2011(filename = "childK5p.dat",
+ ##                          layoutFilename = "ECLSK2011_K5PUF.sps",
+  ##                         forceReread = FALSE,
+   ##                        verbose = TRUE) 
+
+```
