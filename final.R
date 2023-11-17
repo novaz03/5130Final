@@ -114,7 +114,7 @@ model_ana <- lm(C6R4MSCL~., data = red_eclsk)
 #anova(model_ana,reduced_model)
 summary(model_ana)
 
-red_eclsk$MIRT2<-(red_eclsk$MIRT)^2
+red_eclsk$eMIRT<-exp(red_eclsk$MIRT)
 new_model <- lm(C6R4MSCL~., data = red_eclsk)
 #anova(model_ana,reduced_model)
 summary(new_model)
