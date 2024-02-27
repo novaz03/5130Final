@@ -68,7 +68,7 @@ plt.show()
 diff = zip(iterations_num_list, upper_bound_list)
 diff_list = []
 for i, j in diff:
-    diff_list.append(np.log10(np.abs(i - j)))
+    diff_list.append(np.log10((j- i)))
 plt.hist(diff_list, color='red', bins=30)
 
 plt.xlabel('log10(Difference)')
